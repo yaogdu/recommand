@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
+        http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
+
+
+    <!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->
+    <dubbo:application name="${server.dubbo.application.name}"/>
+
+    <dubbo:registry protocol="dubbo" address="zookeeper://${server.zk.url}" file="${server.dubbo.registry.file}"/>
+
+    <context:property-placeholder location="classpath*:*.properties" ignore-unresolvable="true"/>
+    <context:annotation-config/>
+    <context:component-scan base-package="com.demai"/>
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+
+
+    <bean id="httpUtil" name="httpUtil" class="com.demai.util.HttpUtil">
+        <property name="asyncHttpClient" ref="asyncHttpCLient"/>
+    </bean>
+
+    <bean id="asyncHttpClient" name="asyncHttpCLient" class="com.ning.http.client.AsyncHttpClient"/>
+
+    <util:properties id="settings" location="classpath*:server.properties"/>
+
+    <bean name="meetUtil" class="com.demai.util.MeetUtil" />
+
+    <bean name="meetViewUtil" class="com.demai.util.MeetViewUtil"/>
+    <bean name="expireUtil" class="com.demai.util.ExpireUtil"/>
+    <bean name="cityLatlngUtil" class="com.demai.util.CityLatlngUtil" init-method="init"/>
+    <bean name="rankUtil" class="com.demai.util.RankUtil"/>
+
+    <task:scheduled-tasks>
+
+        <task:scheduled ref="meetUtil" method="run" cron="0 0 5,7,9,11,13,15,17,19,21,23 * * ?"/>
+        <!--<task:scheduled ref="meetUtil" method="run" cron="0 0 5-23 * * ?"/>-->
+        <!--11、17点各执行一次 -->
+        <task:scheduled ref="meetViewUtil" method="run" cron="0 30 7-23 * * ?"/>
+        <!--10-17点 3分 各执行一次 -->
+        <!--<task:scheduled ref="expireUtil" method="run" cron="0 5 7-23 * * ?"/>-->
+        <!--&lt;!&ndash;10-17点 3分 各执行一次 &ndash;&gt;-->
+        <!--<task:scheduled ref="rankUtil" method="run" cron="0 7 7-23 * * ?"/>-->
+        <!--&lt;!&ndash;10-17点 3分 各执行一次 &ndash;&gt;-->
+    </task:scheduled-tasks>
+
+
+
+
+</beans>

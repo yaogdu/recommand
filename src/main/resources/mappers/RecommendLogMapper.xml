@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demai.entity.RecommendLog">
+    <resultMap id="recommendMap" type="com.demai.entity.RecommendLog">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="uid" property="uid" jdbcType="BIGINT"/>
+        <result column="object_id" property="objectId" jdbcType="BIGINT"/>
+        <result column="type" property="type" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+
+        <result column="pushed" property="pushed" jdbcType="TINYINT"/>
+        <result column="push_time" property="pushTime" jdbcType="TIMESTAMP"/>
+        <result column="viewed" property="viewed" jdbcType="TINYINT"/>
+        <result column="view_time" property="viewTime" jdbcType="TIMESTAMP"/>
+        <result column="expired" property="expired" jdbcType="TINYINT"/>
+        <result column="forbidden" property="forbidden" jdbcType="TINYINT"/>
+        <result column="source" property="source" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.demai.entity.RecommendLog"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into recommend_log (id,uid,object_id,type,create_time,source)
+          values (#{id},#{uid},#{objectId},#{type},#{createTime},#{source})
+    </insert>
+
+    <delete id="deleteById" parameterType="string">
+      delete from recommend_log where id = #{id}
+    </delete>
+
+    <delete id="deleteUnPushed" parameterType="int">
+        delete from recommend_log where pushed = #{pushed}
+
+
+    </delete>
+
+    <insert id="insertBatch" useGeneratedKeys="true" parameterType="java.util.List">
+        insert into recommend_log (id,uid,object_id,type,create_time,source) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},#{item.uid},#{item.objectId},#{item.type},#{item.createTime},#{item.source})
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.demai.entity.RecommendLog">
+        update recommend_log
+        <set>
+            <if test="pushed != null">
+                pushed = #{pushed},
+            </if>
+
+            <if test="viewed != null">
+                viewed = #{viewed},
+            </if>
+
+            <if test="pushTime != null">
+                push_time = #{pushTime},
+            </if>
+
+            <if test="viewTime != null">
+                view_time = #{viewTime},
+            </if>
+
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <update id="updateStatus" parameterType="map">
+        update recommend_log
+        <set>
+            <if test="pushed != null">
+                pushed = #{pushed},
+            </if>
+
+            <if test="viewed != null">
+                viewed = #{viewed},
+            </if>
+
+            <if test="pushTime != null">
+                push_time = #{pushTime},
+            </if>
+
+            <if test="viewTime != null">
+                view_time = #{viewTime},
+            </if>
+
+            <if test="expired != null">
+                expired = #{expired},
+            </if>
+
+            <if test="forbidden != null">
+                forbidden = #{forbidden},
+            </if>
+
+        </set>
+
+        where 1=1
+
+        <if test="meetId != null ">
+            and object_id = #{meetId}
+        </if>
+
+        <if test="uids != null">
+            and uid in
+            <foreach collection="uids" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+        <if test="objectIds != null">
+            and object_id in
+            <foreach collection="objectIds" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+    </update>
+
+
+    <select id="findById" parameterType="long" resultMap="recommendMap">
+		 select * from recommend_log where id = #{id}
+	</select>
+
+    <select id="findLogs" parameterType="map" resultMap="recommendMap">
+        select * from recommend_log where type = #{type}
+
+        <if test="meetId != null ">
+            and object_id = #{meetId}
+        </if>
+        <if test="pushed != null ">
+            and pushed = #{pushed}
+        </if>
+
+        <if test="viewed != null ">
+            and viewed = #{viewed}
+        </if>
+
+        <if test="expired != null">
+            and expired = #{expired}
+        </if>
+
+        <if test="forbidden != null">
+            and forbidden = #{forbidden}
+        </if>
+
+        <if test="objectIds != null">
+            and object_id in
+            <foreach collection="objectIds" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+
+        <if test="uids != null">
+            and uid in
+            <foreach collection="uids" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+        order by id desc
+        <if test="start != null and rows != null">
+            limit #{start},#{rows}
+
+        </if>
+
+    </select>
+
+    <select id="findLogsCount" parameterType="map" resultType="long" >
+        select count(1) from recommend_log where type = #{type}
+
+        <if test="meetId != null ">
+            and object_id = #{meetId}
+        </if>
+        <if test="pushed != null ">
+            and pushed = #{pushed}
+        </if>
+
+        <if test="viewed != null ">
+            and viewed = #{viewed}
+        </if>
+
+        <if test="expired != null">
+            and expired = #{expired}
+        </if>
+
+        <if test="forbidden != null">
+            and forbidden = #{forbidden}
+        </if>
+
+        <if test="objectIds != null">
+            and object_id in
+            <foreach collection="objectIds" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+
+        <if test="uids != null">
+            and uid in
+            <foreach collection="uids" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+    </select>
+
+
+    <select id="findPushedUnViewedLogs" parameterType="map" resultMap="recommendMap">
+        select * from recommend_log where type = #{type}
+
+        and pushed = 1 and (viewed is null or viewed = 0)
+
+        <if test="time != null">
+            and push_time > #{time}
+        </if>
+
+        <!--<if test="meetId != null ">-->
+        <!--and object_id = #{meetId}-->
+        <!--</if>-->
+        <!-- -->
+
+        <!--<if test="objectIds != null">-->
+        <!--and object_id in-->
+        <!--<foreach collection="objectIds" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>-->
+        <!--</if>-->
+
+        order by id desc
+
+
+        <if test="start != null and rows != null">
+            limit #{start},#{rows}
+
+        </if>
+
+    </select>
+
+
+    <select id="findObjectIds" parameterType="map" resultMap="recommendMap">
+        select distinct object_id from recommend_log where type = #{type}
+
+        <if test="expired != null">
+            and expired = #{expired}
+        </if>
+
+        <if test="forbidden != null">
+            and forbidden = #{forbidden}
+        </if>
+
+        order by id desc
+
+        <if test="start != null and rows != null">
+            limit #{start},#{rows}
+
+        </if>
+
+    </select>
+
+</mapper>

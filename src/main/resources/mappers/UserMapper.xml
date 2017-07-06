@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demai.entity.User">
+    <resultMap id="userMap" type="com.demai.entity.User">
+        <id column="tkey" property="tkey" jdbcType="BIGINT"/>
+        <result column="identifier" property="identifier" jdbcType="CHAR"/>
+        <result column="tag" property="tag" jdbcType="VARCHAR"/>
+        <result column="mobile" property="mobile" jdbcType="VARCHAR"/>
+        <result column="othermobile" property="otherMobile" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="app" property="app" jdbcType="INTEGER"/>
+        <result column="source" property="source" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="nick" property="nick" jdbcType="VARCHAR"/>
+
+        <result column="sex" property="sex" jdbcType="INTEGER"/>
+        <result column="icon" property="icon" jdbcType="INTEGER"/>
+        <result column="openplat" property="openPlat" jdbcType="VARCHAR"/>
+        <result column="time" property="time" jdbcType="INTEGER"/>
+        <result column="flag" property="flag" jdbcType="INTEGER"/>
+        <result column="sequence" property="sequence" jdbcType="INTEGER"/>
+        <result column="confine" property="confine" jdbcType="INTEGER"/>
+        <result column="msgflag" property="msgflag" jdbcType="INTEGER"/>
+        <result column="showphoto" property="showPhoto" jdbcType="VARCHAR"/>
+        <result column="cover" property="cover" jdbcType="VARCHAR"/>
+        <result column="coverpress" property="coverPress" jdbcType="TINYINT"/>
+        <result column="rank" property="rank" jdbcType="INTEGER"/>
+        <result column="mobilestate" property="mobileState" jdbcType="INTEGER"/>
+        <result column="badge" property="badge" jdbcType="VARCHAR"/>
+
+        <result column="cpemail" property="cpEmail" jdbcType="VARCHAR"/>
+        <result column="cpwebsite" property="cpWebsite" jdbcType="VARCHAR"/>
+        <result column="wxnumber" property="wxNumber" jdbcType="VARCHAR"/>
+        <result column="cpaddress" property="cpAddress" jdbcType="VARCHAR"/>
+        <result column="single" property="single" jdbcType="INTEGER"/>
+        <result column="pattern" property="pattern" jdbcType="INTEGER"/>
+        <result column="position" property="position" jdbcType="INTEGER"/>
+        <result column="badgetime" property="badgeTime" jdbcType="INTEGER"/>
+
+        <result column="integrity" property="integrity" jdbcType="INTEGER"/>
+        <result column="point" property="point" jdbcType="INTEGER"/>
+
+
+    </resultMap>
+
+    <insert id="insert" parameterType="com.demai.entity.User"
+            useGeneratedKeys="true" keyProperty="id">
+        <!-- insert into basic (tkey,uid,name,tid,type,content,is_repost,time)
+          values (#{tkey},#{uid},#{name},#{tid},#{type},#{content},#{isRepost},#{time}) -->
+    </insert>
+
+    <delete id="deleteById" parameterType="long">
+      delete from basic where tkey = #{tkey}
+    </delete>
+
+    <update id="update" parameterType="com.demai.entity.User">
+        <!-- update basic
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+
+
+        </set>
+        where tkey = #{tkey}  -->
+    </update>
+
+    <select id="findById" parameterType="long" resultMap="userMap">
+		 select * from basic where tkey = #{tkey}
+	</select>
+
+
+    <select id="findBySequence" parameterType="long" resultMap="userMap">
+		select * from basic where sequence = #{sequence}
+	</select>
+
+    <select id="findByParam" parameterType="map" resultMap="userMap">
+        select * from basic
+        <where>
+            <if test="uids != null">
+                tkey in
+                <foreach collection="uids" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

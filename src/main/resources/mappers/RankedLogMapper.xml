@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demai.entity.RankedLog">
+    <resultMap id="logMap" type="com.demai.entity.RankedLog">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="uid" property="uid" jdbcType="BIGINT"/>
+        <result column="object_id" property="objectId" jdbcType="BIGINT"/>
+
+        <result column="latlng" property="latlng" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="rank" property="rank" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.demai.entity.RankedLog"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into recommend_log (id,uid,object_id,latlng,city,rank)
+          values (#{id},#{uid},#{objectId},#{latlng},#{city},#{rank})
+    </insert>
+
+    <delete id="deleteById" parameterType="string">
+      delete from ranked_log where id = #{id}
+    </delete>
+
+    <delete id="deleteAll" parameterType="string">
+        delete from ranked_log
+    </delete>
+
+    <delete id="deleteInBatch" parameterType="map">
+        delete from ranked_log where 1=1
+
+        <if test="objectIds != null">
+            and object_id in
+            <foreach collection="objectIds" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+    </delete>
+
+
+    <insert id="insertBatch" useGeneratedKeys="true" parameterType="java.util.List">
+        insert into ranked_log (id,uid,object_id,latlng,city,rank) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},#{item.uid},#{item.objectId},#{item.latlng},#{item.city},${item.rank})
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.demai.entity.RankedLog">
+        update ranked_log
+        <set>
+            <if test="city != null">
+                city = #{city},
+            </if>
+
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <update id="updateStatus" parameterType="map">
+        update ranked_log
+        <set>
+            <if test="city != null">
+                city = #{city},
+            </if>
+
+        </set>
+
+        where 1=1
+
+        <if test="meetId != null ">
+            and object_id = #{meetId}
+        </if>
+
+        <if test="uids != null">
+            and uid in
+            <foreach collection="uids" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+        <if test="objectIds != null">
+            and object_id in
+            <foreach collection="objectIds" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+    </update>
+
+
+    <select id="findById" parameterType="long" resultMap="logMap">
+		 select * from ranked_log where id = #{id}
+	</select>
+
+    <select id="findLogs" parameterType="map" resultMap="logMap">
+        select * from ranked_log where type = #{type}
+
+        <if test="meetId != null ">
+            and object_id = #{meetId}
+        </if>
+
+        <if test="objectIds != null">
+            and object_id in
+            <foreach collection="objectIds" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+
+        order by id desc
+        <if test="start != null and rows != null">
+            limit #{start},#{rows}
+
+        </if>
+
+    </select>
+
+    <select id="findObjectIds" parameterType="map" resultMap="logMap">
+        select distinct object_id from ranked_log where 1=1
+
+        <if test="city != null">
+            and city = #{city}
+        </if>
+
+        order by id desc
+
+        <if test="start != null and rows != null">
+            limit #{start},#{rows}
+
+        </if>
+
+    </select>
+
+</mapper>
